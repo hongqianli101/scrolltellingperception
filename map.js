@@ -218,8 +218,6 @@ map.on("load", function () {
         },
     });
     }
-    
-
     map.addLayer({
         'id': 'safety',
         'type': 'fill',
@@ -274,6 +272,20 @@ map.on("load", function () {
             'fill-opacity': ['case', ['==', ['get', 'depressing'], null], 49, 0.5]
         }
     });
+    map.addLayer({
+        'id': 'perceptionmax',
+        'type': 'circle',
+        'source': {
+            'type': 'geojson',
+            'data': 'data/perceptionmax.geojson'
+        },
+        'paint': {
+            'circle-color': '#ff7f50',
+            'circle-stroke-color': '#4d4d4d',
+            'circle-stroke-width': 0.5,
+            'circle-radius': 5
+        }
+    });
     
     map.addLayer({
         'id': 'skyview',
@@ -294,12 +306,46 @@ map.on("load", function () {
                 0.18, 1,
                 1, 1000
             ]
-        }
+        },
+        
+        
     });
+    map.addLayer({
+        'id': 'bikecount',
+        'type': 'fill-extrusion',
+        'source': {
+            'type': 'geojson',
+            'data': 'data/bikecount.geojson' 
+        },
+        'paint': {
+            'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'point_count'],
+                1, '#091f59',
+                1251, '#205ea7',
+                3578, '#40b9c4',
+                5970, '#c7e8b3',
+                9122, '#ffffd9'
+        ],
+        'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'point_count'],
+                1, 1,
+                10000, 1000
+            ]
+        },
+        
+        
+    });
+
+        // 设置默认不透明度为0
+        var allLayers = ['safety', 'lively', 'depressing', 'perceptionmax', 'skyview', 'bikecount'];
+        allLayers.forEach(layer => {
+            var paintProps = getLayerPaintType(layer);
+            paintProps.forEach(function (prop) {
+                map.setPaintProperty(layer, prop, 0);
+            });
+        });
 
 
   // Setup the instance, pass callback functions
-  scroller
+scroller
     .setup({
     step: ".step",
     offset: 0.75,
@@ -354,7 +400,6 @@ map.on("load", function () {
     }
     });
 });
-
 /* Here we watch for any resizing of the screen to
 adjust our scrolling setup */
 window.addEventListener("resize", scroller.resize);
